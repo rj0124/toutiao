@@ -3,19 +3,19 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
+// 路由表
 const routes = [
   {
     path: '/login',
     name: 'login',
     component: () => import('@/views/login/')
   },
-  {
+  { // 一级路由渲染到根组件中的 router-view
     path: '/',
     component: () => import('@/views/layout/'),
-    childer: [
+    children: [ // 子路由渲染到父路由的 router-view 中
       {
-        // 首页 默认子路由
-        path: '',
+        path: '', // 默认子路由
         name: 'home',
         component: () => import('@/views/home/')
       },
