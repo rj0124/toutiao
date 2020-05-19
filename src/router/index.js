@@ -10,6 +10,11 @@ const routes = [
     name: 'login',
     component: () => import('@/views/login/')
   },
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('@/views/search/')
+  },
   { // 一级路由渲染到根组件中的 router-view
     path: '/',
     component: () => import('@/views/layout/'),
