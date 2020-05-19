@@ -28,27 +28,60 @@
         <article-list :channel="channel" />
         <!-- /文章列表 -->
       </van-tab>
+      <div slot="nav-right" class="wap-nav-placeholder"></div>
+      <div
+        slot="nav-right"
+        @click="isChannelEditShow = true"
+        class="wap-nav-wrap"
+      >
+        <van-icon name="wap-nav" />
+      </div>
     </van-tabs>
     <!-- /文章频道列表 -->
+    <van-popup
+    v-model="isChannelEditShow"
+    position="bottom"
+    class="channel-edit-popup"
+    closeable
+    close-icon-position="top-left"
+    get-container="body"
+    style="height: 100%"
+    >
+    <channel-edit
+      :user-channels="channels"
+      :active="active"
+      @close="isChannelEditShow = false"
+      @update-active="active = $event"
+    />
+    </van-popup>
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/user'
 import ArticleList from './components/article-list'
+import ChannelEdit from './components/channel-edit'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
+
 export default {
   name: 'HomeIndex',
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   },
   props: {},
   data () {
     return {
       active: 0, // 控制被激活的标签
-      channels: [] // 频道列表
+      channels: [], // 频道列表
+      // 控制编辑频道的弹出层
+      isChannelEditShow: false
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['user'])
+  },
   watch: {},
   created () {
     this.loadChannels()
@@ -57,10 +90,27 @@ export default {
   methods: {
     async loadChannels () {
       // 请求获取频道数据
-      const { data } = await getUserChannels()
-      console.log(data)
-      this.channels = data.data.channels
+      // const { data } = await getUserChannels()
+      // this.channels = data.data.channels
+      let channels = []
+      if (this.user) {
+        const { data } = await getUserChannels()
+        channels = data.data.channels
+      } else {
+        const loadChannels = getItem('user-channels')
+        if (loadChannels) {
+          channels = loadChannels
+        } else {
+          const { data } = await getUserChannels()
+          channels = data.data.channels
+        }
+      }
+      this.channels = channels
     }
+    // onUpdateActive (index) {
+    //   console.log(index)
+    //   this.active = index
+    // }
   }
 }
 </script>
@@ -94,5 +144,34 @@ export default {
       background-color: #3296fa;
     }
   }
+  .wap-nav-placeholder {
+    width: 33px;
+    flex-shrink: 0;
+  }
+  .wap-nav-wrap {
+    position: fixed;
+    right: 0;
+    width: 33px;
+    height: 43px;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: .9;
+    .van-icon {
+      font-size: 24px;
+    }
+    &::before {
+      content: '';
+      width: 1px;
+      height: 43px;
+      background: url("./line.png") no-repeat;
+      background-size: contain;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  }
 }
+
 </style>
